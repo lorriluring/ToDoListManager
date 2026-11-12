@@ -21,7 +21,7 @@ The application automatically stores task data in a JSON file and restores the p
 - Modify existing tasks
 - Mark tasks as completed
 - Delete tasks
-- Save tasks to a JSON file
+- Task data is persisted using JSON serialization, allowing the application to restore its previous state when restarted.
 - Restore previous application state on startup
 - User-friendly validation and error handling
 
@@ -79,6 +79,10 @@ Main Menu:
 
 ![Main Menu](screenshots/main-menu.png)
 
+### Add New Task
+
+![New Task](screenshots/add-new.png).
+
 ### View Tasks
 
 ![View Tasks](screenshots/view-tasks.png)
@@ -90,10 +94,6 @@ Main Menu:
 ### Sort by Date
 
 ![Sort By Date](screenshots/sort-by-date.png)
-
-### JSON Save File
-
-![JSON File](screenshots/json-file.png)
 
 ---
 
