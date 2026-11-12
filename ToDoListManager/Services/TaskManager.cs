@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ToDoListManager.Models;
 using System.Text.Json;
+using System.Linq;
 
 namespace ToDoListManager.Services
 {
@@ -12,9 +13,28 @@ namespace ToDoListManager.Services
         // List to store the tasks
         private List<TaskItem> tasks = new();
 
+        // Method to write error message in red color to the console instead of writing it for each error message separately.
+        private static void WriteError(string message)
+        {
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(message);
+            Console.ForegroundColor = originalColor;
+        }
+
+        // Method to write success message in green color to the console instead of writing it for each success message separately.
+        private static void WriteSuccess(string message)
+        {
+            ConsoleColor originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message);
+            Console.ForegroundColor = originalColor;
+        }
+
         //  Method to add a new task to the list with input validation for title, due date, and project name.
         public void AddTask()
         {
+            // Input validation for task title, due date, and project name
             string title;
             do
             {
@@ -23,11 +43,11 @@ namespace ToDoListManager.Services
 
                 if (string.IsNullOrWhiteSpace(title))
                 {
-                    Console.WriteLine("Task title cannot be empty.");
-                    Console.WriteLine("Example: Finish UML Diagram");
+                    WriteError("Task title cannot be empty.");
+                    WriteError("Example: Finish UML Diagram");
                 }
             } while (string.IsNullOrWhiteSpace(title));
-
+            // Input validation for due date
             DateTime dueDate;
             while (true)
             {
@@ -44,14 +64,15 @@ namespace ToDoListManager.Services
                     if (dueDate >= DateTime.Today)
                         break;
 
-                    Console.WriteLine("Due date cannot be in the past.");
+                    WriteError("Due date cannot be in the past.");
                 }
                 else
                 {
-                    Console.WriteLine("Invalid date format.");
-                    Console.WriteLine("Example: 2026-11-15");
+                    WriteError("Invalid date format.");
+                    WriteError("Example: 2026-11-15");
                 }
             }
+            // Input validation for project name
 
             string project;
             do
@@ -61,15 +82,16 @@ namespace ToDoListManager.Services
 
                 if (string.IsNullOrWhiteSpace(project))
                 {
-                    Console.WriteLine("Project name cannot be empty.");
-                    Console.WriteLine("Example: School");
+                    WriteError("Project name cannot be empty.");
+                    WriteError("Example: School");
                 }
             } while (string.IsNullOrWhiteSpace(project));
+            // Generate a new unique ID for the task
 
             int newId = tasks.Count == 0
                 ? 1
                 : tasks.Max(t => t.Id) + 1;
-
+            // Create a new TaskItem object and add it to the list
             TaskItem newTask = new TaskItem(
                 newId,
                 title,
@@ -79,7 +101,7 @@ namespace ToDoListManager.Services
 
             tasks.Add(newTask);
 
-            Console.WriteLine("Task added successfully!");
+            WriteSuccess("Task added successfully!");
         }
 
         // Method to display all tasks in a formatted table with headers and status indicators.
@@ -87,21 +109,12 @@ namespace ToDoListManager.Services
         {
             if (tasks.Count == 0)
             {
-                Console.WriteLine("No tasks found.");
+                WriteError("No tasks found.");
                 return;
             }
+            // Display tasks in a formatted table
 
-            Console.WriteLine();
-            Console.WriteLine("ID | Title | Due Date | Project | Status");
-            Console.WriteLine("---------------------------------------------------------");
-
-            foreach (TaskItem task in tasks)
-            {
-                string status = task.IsCompleted ? "Done" : "Open";
-
-                Console.WriteLine(
-                    $"{task.Id} | {task.Title} | {task.DueDate:yyyy-MM-dd} | {task.Project} | {status}");
-            }
+            DisplayTasks(tasks);
         }
 
         // Method to update an existing task with input validation for task ID, title, due date, and project name.
@@ -109,14 +122,14 @@ namespace ToDoListManager.Services
         {
             if (tasks.Count == 0)
             {
-                Console.WriteLine("No tasks found.");
+                WriteError("No tasks found.");
                 return;
             }
-
+            // Display tasks to help the user select a task to modify
             ShowTasks();
 
             TaskItem selectedTask = null;
-
+            // Input validation for task ID and selection of the task to modify
             while (selectedTask == null)
             {
                 Console.Write("Enter the ID of the task you want to modify: ");
@@ -124,9 +137,9 @@ namespace ToDoListManager.Services
 
                 if (!int.TryParse(input, out int taskId))
                 {
-                    Console.WriteLine("Invalid task ID.");
-                    Console.WriteLine("Please enter a numeric value.");
-                    Console.WriteLine("Example: 1");
+                    WriteError("Invalid task ID.");
+                    WriteError("Please enter a numeric value.");
+                    WriteError("Example: 1");
                     continue;
                 }
 
@@ -134,10 +147,11 @@ namespace ToDoListManager.Services
 
                 if (selectedTask == null)
                 {
-                    Console.WriteLine("Task not found.");
-                    Console.WriteLine("Please enter an existing task ID.");
+                    WriteError("Task not found.");
+                    WriteError("Please enter an existing task ID.");
                 }
             }
+            // Menu for modifying the selected task with options to edit title, due date, project name, mark as complete, or return to the main menu.
 
             bool modifying = true;
 
@@ -153,7 +167,7 @@ namespace ToDoListManager.Services
 
                 Console.Write("Choose an option: ");
                 string choice = Console.ReadLine();
-
+                // Input validation and handling of the user's choice for modifying the selected task
                 switch (choice)
                 {
                     case "1":
@@ -167,15 +181,15 @@ namespace ToDoListManager.Services
 
                             if (string.IsNullOrWhiteSpace(newTitle))
                             {
-                                Console.WriteLine("Title cannot be empty.");
-                                Console.WriteLine("Example: Finish UML Diagram");
+                                WriteError("Title cannot be empty.");
+                                WriteError("Example: Finish UML Diagram");
                             }
                         } while (string.IsNullOrWhiteSpace(newTitle));
 
                         selectedTask.Title = newTitle;
-                        Console.WriteLine("Title updated successfully.");
+                        WriteSuccess("Title updated successfully.");
                         break;
-
+                    // Input validation for due date with format checking and past date restriction
                     case "2":
 
                         DateTime newDueDate;
@@ -195,19 +209,19 @@ namespace ToDoListManager.Services
                                 if (newDueDate >= DateTime.Today)
                                     break;
 
-                                Console.WriteLine("Due date cannot be in the past.");
+                                WriteError("Due date cannot be in the past.");
                             }
                             else
                             {
-                                Console.WriteLine("Invalid date format.");
-                                Console.WriteLine("Example: 2026-11-15");
+                                WriteError("Invalid date format.");
+                                WriteError("Example: 2026-11-15");
                             }
                         }
 
                         selectedTask.DueDate = newDueDate;
-                        Console.WriteLine("Due date updated successfully.");
+                        WriteSuccess("Due date updated successfully.");
                         break;
-
+                    // Input validation for project name with non-empty restriction
                     case "3":
 
                         string newProject;
@@ -219,29 +233,30 @@ namespace ToDoListManager.Services
 
                             if (string.IsNullOrWhiteSpace(newProject))
                             {
-                                Console.WriteLine("Project name cannot be empty.");
-                                Console.WriteLine("Example: School");
+                                WriteError("Project name cannot be empty.");
+                                WriteError("Example: School");
                             }
                         } while (string.IsNullOrWhiteSpace(newProject));
 
                         selectedTask.Project = newProject;
-                        Console.WriteLine("Project updated successfully.");
+                        WriteSuccess("Project updated successfully.");
                         break;
-
+                    // Check if the task is already completed before marking it as complete
                     case "4":
 
                         if (selectedTask.IsCompleted)
                         {
-                            Console.WriteLine("This task is already completed.");
+                            WriteError("This task is already completed.");
                         }
                         else
                         {
                             selectedTask.IsCompleted = true;
-                            Console.WriteLine("Task marked as complete.");
+                            WriteSuccess("Task marked as complete.");
                         }
 
                         break;
 
+                    // Exit the modification menu and return to the main menu
                     case "5":
 
                         modifying = false;
@@ -249,8 +264,8 @@ namespace ToDoListManager.Services
 
                     default:
 
-                        Console.WriteLine("Invalid option.");
-                        Console.WriteLine("Please choose a number between 1 and 5.");
+                        WriteError("Invalid option.");
+                        WriteError("Please choose a number between 1 and 5.");
                         break;
                 }
             }
@@ -261,10 +276,10 @@ namespace ToDoListManager.Services
         {
             if (tasks.Count == 0)
             {
-                Console.WriteLine("No tasks found.");
+                WriteError("No tasks found.");
                 return;
             }
-
+            // Display tasks to help the user select a task to mark as complete
             ShowTasks();
 
             TaskItem selectedTask = null;
@@ -274,33 +289,33 @@ namespace ToDoListManager.Services
                 Console.Write("Enter the ID of the task to mark as complete: ");
 
                 string input = Console.ReadLine();
-
+                // Input validation for task ID and selection of the task to mark as complete
                 if (!int.TryParse(input, out int taskId))
                 {
-                    Console.WriteLine("Invalid task ID.");
-                    Console.WriteLine("Please enter a numeric value.");
-                    Console.WriteLine("Example: 1");
+                    WriteError("Invalid task ID.");
+                    WriteError("Please enter a numeric value.");
+                    WriteError("Example: 1");
                     continue;
                 }
-
+                // Find the task with the specified ID in the list of tasks
                 selectedTask = tasks.FirstOrDefault(t => t.Id == taskId);
 
                 if (selectedTask == null)
                 {
-                    Console.WriteLine("Task not found.");
-                    Console.WriteLine("Please select an existing task.");
+                    WriteError("Task not found.");
+                    WriteError("Please select an existing task.");
                 }
             }
-
+            // Check if the selected task is already marked as complete before updating its status
             if (selectedTask.IsCompleted)
             {
-                Console.WriteLine("This task is already marked as complete.");
+                WriteError("This task is already marked as complete.");
                 return;
             }
-
+            // Mark the selected task as complete and provide feedback to the user
             selectedTask.IsCompleted = true;
 
-            Console.WriteLine("Task marked as complete.");
+            WriteSuccess("Task marked as complete.");
         }
 
         // Method to delete a task from the list with confirmation prompt and input validation for task ID.
@@ -308,38 +323,38 @@ namespace ToDoListManager.Services
         {
             if (tasks.Count == 0)
             {
-                Console.WriteLine("No tasks found.");
+                WriteError("No tasks found.");
                 return;
             }
-
+            // Display tasks to help the user select a task to delete
             ShowTasks();
 
             Console.Write("Enter the ID of the task you want to delete: ");
 
             if (!int.TryParse(Console.ReadLine(), out int taskId))
             {
-                Console.WriteLine("Invalid input. Please enter a valid task ID.");
+                WriteError("Invalid input. Please enter a valid task ID.");
                 return;
             }
-
+            // Find the task with the specified ID in the list of tasks
             TaskItem taskToDelete = tasks.FirstOrDefault(t => t.Id == taskId);
 
             if (taskToDelete == null)
             {
-                Console.WriteLine("Task not found.");
+                WriteError("Task not found.");
                 return;
             }
-
+            // Confirmation prompt before deleting the task
             Console.WriteLine($"Are you sure you want to delete \"{taskToDelete.Title}\"?");
             Console.WriteLine("1. Yes");
             Console.WriteLine("2. No");
 
             string choice = Console.ReadLine();
-
+            // Handle the user's choice for deleting the task with appropriate feedback
             if (choice == "1")
             {
                 tasks.Remove(taskToDelete);
-                Console.WriteLine("Task deleted successfully.");
+                WriteSuccess("Task deleted successfully.");
             }
             else
             {
@@ -347,95 +362,64 @@ namespace ToDoListManager.Services
             }
         }
 
+        // Method to search for tasks based on title, project name, or due date with input validation for search term.
         public void SearchTasks()
         {
             if (tasks.Count == 0)
             {
-                Console.WriteLine("No tasks found.");
+                WriteError("No tasks found.");
                 return;
             }
-
+            // Prompt the user to enter a search term and validate the input
             Console.Write("Enter search term: ");
             string searchTerm = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                Console.WriteLine("Search term cannot be empty.");
+                WriteError("Search term cannot be empty.");
                 return;
             }
-
+            // Perform the search by filtering tasks based on title, project name, or due date
             var results = tasks.Where(t =>
                 t.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                 t.Project.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                 t.DueDate.ToString("yyyy-MM-dd").Contains(searchTerm))
                 .ToList();
-
+            // Display the search results or inform the user if no tasks matched the search term
             if (results.Count == 0)
             {
-                Console.WriteLine($"No tasks matched \"{searchTerm}\".");
+                WriteError($"No tasks matched \"{searchTerm}\".");
                 return;
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Search Results:");
-            Console.WriteLine("ID | Title | Due Date | Project | Status");
-            Console.WriteLine("---------------------------------------------------------");
-
-            foreach (var task in results)
-            {
-                string status = task.IsCompleted ? "Done" : "Open";
-
-                Console.WriteLine(
-                    $"{task.Id} | {task.Title} | {task.DueDate:yyyy-MM-dd} | {task.Project} | {status}");
-            }
+            DisplayTasks(results);
         }
 
+        // Method to sort tasks by due date and display them in a formatted table.
         public void SortByDate()
         {
             if (tasks.Count == 0)
             {
-                Console.WriteLine("No tasks found.");
+                WriteError("No tasks found.");
                 return;
             }
 
-            var sortedTasks = tasks.OrderBy(t => t.DueDate);
-
-            Console.WriteLine();
-            Console.WriteLine("ID | Title | Due Date | Project | Status");
-            Console.WriteLine("---------------------------------------------------------");
-
-            foreach (var task in sortedTasks)
-            {
-                string status = task.IsCompleted ? "Done" : "Open";
-
-                Console.WriteLine(
-                    $"{task.Id} | {task.Title} | {task.DueDate:yyyy-MM-dd} | {task.Project} | {status}");
-            }
+            DisplayTasks(tasks.OrderBy(t => t.DueDate));
         }
 
+        // Method to sort tasks by project name and display them in a formatted table.
         public void SortByProject()
         {
             if (tasks.Count == 0)
             {
-                Console.WriteLine("No tasks found.");
+                WriteError("No tasks found.");
                 return;
             }
 
-            var sortedTasks = tasks.OrderBy(t => t.Project);
-
-            Console.WriteLine();
-            Console.WriteLine("ID | Title | Due Date | Project | Status");
-            Console.WriteLine("---------------------------------------------------------");
-
-            foreach (var task in sortedTasks)
-            {
-                string status = task.IsCompleted ? "Done" : "Open";
-
-                Console.WriteLine(
-                    $"{task.Id} | {task.Title} | {task.DueDate:yyyy-MM-dd} | {task.Project} | {status}");
-            }
+            DisplayTasks(tasks.OrderBy(t => t.Project));
         }
 
+        // Method to save the list of tasks to a JSON file with pretty-print formatting.
         public void SaveToFile()
         {
             string json = JsonSerializer.Serialize(tasks, new JsonSerializerOptions
@@ -445,15 +429,16 @@ namespace ToDoListManager.Services
 
             File.WriteAllText("tasks.json", json);
 
-            Console.WriteLine("Tasks saved successfully.");
+            WriteSuccess("Tasks saved successfully.");
         }
 
+        // Method to load the list of tasks from a JSON file with error handling for file existence and deserialization.
         public void LoadFromFile()
         {
             if (!File.Exists("tasks.json"))
             {
-                Console.WriteLine("No existing task list found.");
-                Console.WriteLine("Creating a new task list...");
+                WriteError("No existing task list found.");
+                WriteError("Creating a new task list...");
                 return;
             }
 
@@ -461,9 +446,32 @@ namespace ToDoListManager.Services
 
             tasks = JsonSerializer.Deserialize<List<TaskItem>>(json) ?? new List<TaskItem>();
 
-            Console.WriteLine("Tasks loaded successfully.");
+            WriteSuccess("Tasks loaded successfully.");
         }
 
+        // Private method to display a list of tasks in a formatted table with headers and status indicators.
+        private void DisplayTasks(IEnumerable<TaskItem> tasksToDisplay)
+        {
+            const string rowFormat = "| {0,-4} | {1,-30} | {2,-10} | {3,-20} | {4,-6} |";
+
+            Console.WriteLine();
+            Console.WriteLine(string.Format(rowFormat, "ID", "Title", "Due Date", "Project", "Status"));
+            Console.WriteLine(new string('-', 84));
+
+            foreach (var task in tasksToDisplay)
+            {
+                // Determine the status of the task and truncate title and project name if they exceed specified lengths
+                string status = task.IsCompleted
+                    ? "\u001b[32mDone\u001b[0m" // Green text for completed tasks
+                    : "\u001b[34mOpen\u001b[0m"; // Blue text for open tasks
+                string title = task.Title.Length > 30 ? task.Title[..27] + "..." : task.Title;
+                string project = task.Project.Length > 20 ? task.Project[..17] + "..." : task.Project;
+
+                Console.WriteLine(string.Format(rowFormat, task.Id, title, task.DueDate.ToString("yyyy-MM-dd"), project, status));
+            }
+        }
+
+        // Method to display a menu for viewing tasks with options to show all tasks, sort by due date, sort by project, search tasks, or return to the main menu.
         public void ViewTasksMenu()
         {
             bool viewing = true;
@@ -482,6 +490,7 @@ namespace ToDoListManager.Services
 
                 string choice = Console.ReadLine();
 
+                // Input validation and handling of the user's choice for viewing tasks
                 switch (choice)
                 {
                     case "1":
@@ -505,8 +514,8 @@ namespace ToDoListManager.Services
                         break;
 
                     default:
-                        Console.WriteLine("Invalid option.");
-                        Console.WriteLine("Please enter a number between 1 and 5.");
+                        WriteError("Invalid option.");
+                        WriteError("Please enter a number between 1 and 5.");
                         break;
                 }
             }

@@ -6,17 +6,23 @@ namespace ToDoListManager
 {
     internal class Program
     {
+        // Main entry point of the application
         private static void Main(string[] args)
         {
+            // Create an instance of TaskManager and load tasks from file
             TaskManager taskManager = new TaskManager();
             taskManager.LoadFromFile();
 
             bool running = true;
-
+            // Main loop for the application
             while (running)
             {
+                // Display the main menu to the user
                 Console.WriteLine();
+                // Set the console text color to dark yellow for the title
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("=== TODO LIST MANAGER ===");
+                Console.ResetColor();
                 Console.WriteLine("1. View Tasks");
                 Console.WriteLine("2. Add New Task");
                 Console.WriteLine("3. Modify Task");
@@ -25,7 +31,7 @@ namespace ToDoListManager
                 Console.Write("Choose an option: ");
 
                 string choice = Console.ReadLine();
-
+                // Handle user input and call appropriate methods in TaskManager
                 switch (choice)
                 {
                     case "1":
@@ -49,11 +55,12 @@ namespace ToDoListManager
                         running = false;
                         Console.WriteLine("See you next time!");
                         break;
-
+                    // Handle invalid input
                     default:
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Invalid option.");
+                        Console.ResetColor();
                         Console.WriteLine("Please enter a number between 1 and 5.");
-                        Console.WriteLine("Example: 2");
                         break;
                 }
             }
