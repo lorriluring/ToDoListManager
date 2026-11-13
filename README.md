@@ -108,7 +108,7 @@ Main Menu:
 - Documentation
 
 GitHub Profile:
-([Add your GitHub profile link here](https://github.com/lorriluring))
+([lorriluring](https://github.com/lorriluring))
 
 ---
 
